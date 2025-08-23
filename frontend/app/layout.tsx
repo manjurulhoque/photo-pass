@@ -2,10 +2,14 @@ import type { Metadata } from "next";
 import { GeistSans } from "geist/font/sans";
 import { GeistMono } from "geist/font/mono";
 import "./globals.css";
+import { QueryProvider } from "@/components/providers/query-provider";
+import { ThemeProvider } from "@/components/theme-provider";
+import { Toaster } from "@/components/ui/sonner";
 
 export const metadata: Metadata = {
     title: "PhotoPass",
-    description: "PhotoPass is a platform for creating and sharing photos with friends and family.",
+    description:
+        "PhotoPass is a platform for creating and sharing photos with friends and family.",
 };
 
 export default function RootLayout({
@@ -14,7 +18,7 @@ export default function RootLayout({
     children: React.ReactNode;
 }>) {
     return (
-        <html lang="en">
+        <html lang="en" suppressHydrationWarning>
             <head>
                 <style>{`
             html {
@@ -24,7 +28,19 @@ export default function RootLayout({
             }
         `}</style>
             </head>
-            <body>{children}</body>
+            <body>
+                <QueryProvider>
+                    <ThemeProvider
+                        attribute="class"
+                        defaultTheme="system"
+                        enableSystem
+                        disableTransitionOnChange
+                    >
+                        {children}
+                        <Toaster />
+                    </ThemeProvider>
+                </QueryProvider>
+            </body>
         </html>
     );
 }

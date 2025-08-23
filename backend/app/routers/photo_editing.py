@@ -66,7 +66,7 @@ async def upload_image(file: UploadFile = File(...)):
         raise HTTPException(status_code=500, detail=f"Failed to upload image: {str(e)}")
 
 
-@router.get("/change-background")
+@router.post("/change-background")
 async def change_background(request: ChangeBackgroundRequest):
     """
     Change the background of an image

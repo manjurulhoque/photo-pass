@@ -88,8 +88,7 @@ export const photoApi = {
     changeBackground: async (
         request: ChangeBackgroundRequest
     ): Promise<Blob> => {
-        const response = await api.get("/api/v1/change-background", {
-            params: request,
+        const response = await api.post("/api/v1/change-background", request, {
             responseType: "blob",
         });
 

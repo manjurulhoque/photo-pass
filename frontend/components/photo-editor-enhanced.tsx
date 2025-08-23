@@ -288,6 +288,37 @@ export function PhotoEditorEnhanced() {
         [uploadedImage, uploadedFilename, changeBackgroundMutation]
     );
 
+    // Remove background with API integration
+
+    const removeBackground = useCallback(
+        async () => {
+            if (!uploadedImage || !uploadedFilename) {
+                toast.error("Please upload an image first");
+                return;
+            }
+
+            try {
+                const bgColor =
+                    BACKGROUND_COLORS[
+                        selectedBackground as keyof typeof BACKGROUND_COLORS
+                    ].color;
+
+                const result = await changeBackgroundMutation.mutateAsync({
+                    filename: uploadedFilename,
+                    background_color: bgColor,
+                });
+
+                const processedDataUrl = await blobToDataUrl(result);
+                setProcessedImage(processedDataUrl);
+                toast.success("Background removed successfully!");
+            } catch (error) {
+                console.error("Background removal failed:", error);
+                toast.error("Failed to remove background. Please try again.");
+            }
+        },
+        [uploadedImage, uploadedFilename, changeBackgroundMutation]
+    );
+
     // Process image size with API integration
     const processImageSize = useCallback(
         async (sizeKey: string) => {
@@ -678,9 +709,12 @@ export function PhotoEditorEnhanced() {
                                         disabled={
                                             !uploadedImage || isProcessing
                                         }
+                                        onClick={() =>
+                                            removeBackground()
+                                        }
                                     >
                                         <Scissors className="w-4 h-4 mr-2" />
-                                        Remove Background (Coming Soon)
+                                        Remove Background
                                     </Button>
                                 </CardContent>
                             </Card>

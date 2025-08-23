@@ -71,14 +71,11 @@ async def change_background(request: ChangeBackgroundRequest):
     """
     Change the background of an image
     """
-    try:
-        processor = ImageProcessor()
-        result_path = await processor.change_background(
-            request.filename, request.background_color
-        )
-        return FileResponse(result_path, media_type="image/jpeg")
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+    processor = ImageProcessor()
+    result_path = await processor.change_background(
+        request.filename, request.background_color
+    )
+    return FileResponse(result_path, media_type="image/jpeg")
 
 
 @router.post("/brightness")

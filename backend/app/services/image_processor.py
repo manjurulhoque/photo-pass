@@ -1,3 +1,4 @@
+from rembg import remove
 import os
 import time
 from PIL import Image, ImageEnhance, ImageFilter
@@ -38,17 +39,23 @@ class ImageProcessor:
         return output_path
 
     async def change_background(self, filename: str, background_color: str) -> str:
-        """Change the background of an image"""
+        """Remove old background and apply a new background color"""
         start_time = time.time()
 
+        # Load original
         image = self._load_image(filename)
-        image = image.convert("RGB")
 
-        # Create a new image with the background color
-        background = Image.new("RGB", image.size, background_color)
+        # Remove background -> result has transparency
+        image_no_bg = remove(image)  # returns RGBA with transparent bg
 
-        # Paste the image onto the background
-        background.paste(image, (0, 0), image)
+        # Create a new background
+        background = Image.new("RGBA", image_no_bg.size, background_color)
+
+        # Paste the subject onto new background
+        background.paste(image_no_bg, (0, 0), image_no_bg)
+
+        # Convert to RGB (no alpha) if you want JPEG
+        background = background.convert("RGB")
 
         output_path = self._get_processed_path(filename, f"_background_{background_color}")
         self._save_image(background, output_path)

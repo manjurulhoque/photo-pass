@@ -30,8 +30,8 @@ const PHOTO_SIZES = {
     },
     indianVisa: {
         name: "Indian Visa",
-        width: 600,
-        height: 600,
+        width: 350,
+        height: 350,
         displaySize: "2x2 inches",
     },
     usVisa: {
@@ -42,14 +42,14 @@ const PHOTO_SIZES = {
     },
     ukVisa: {
         name: "UK Visa",
-        width: 413,
-        height: 531,
+        width: 600,
+        height: 750,
         displaySize: "45x35mm",
     },
     schengenVisa: {
         name: "Schengen Visa",
-        width: 531,
-        height: 413,
+        width: 827,
+        height: 1063,
         displaySize: "35x45mm",
     },
     canadaVisa: {

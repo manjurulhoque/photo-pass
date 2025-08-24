@@ -434,7 +434,7 @@ export function PhotoEditorEnhanced() {
 
             <main className="container mx-auto px-4 py-8">
                 <div className="mx-auto">
-                    <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                    <div className="grid grid-cols-1 lg:grid-cols-[1fr_2fr_3fr] gap-8">
                         {/* Left Column: Photo Filters & Effects */}
                         <div className="space-y-6">
                             <PhotoFilters
@@ -602,7 +602,7 @@ export function PhotoEditorEnhanced() {
                         </div>
 
                         {/* Right Column: Templates, Sizes, Background Options, Export */}
-                        <div className="space-y-6">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <Card>
                                 <CardHeader>
                                     <CardTitle className="flex items-center gap-2">

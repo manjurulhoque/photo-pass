@@ -17,6 +17,7 @@ import {
     useChangeBackground,
     useResizeImage,
 } from "@/hooks/use-photo-api";
+import { PhotoFilters } from "@/components/photo-filters";
 import { blobToDataUrl, validateImageFile, formatFileSize } from "@/lib/utils";
 import { toast } from "sonner";
 
@@ -290,34 +291,31 @@ export function PhotoEditorEnhanced() {
 
     // Remove background with API integration
 
-    const removeBackground = useCallback(
-        async () => {
-            if (!uploadedImage || !uploadedFilename) {
-                toast.error("Please upload an image first");
-                return;
-            }
+    const removeBackground = useCallback(async () => {
+        if (!uploadedImage || !uploadedFilename) {
+            toast.error("Please upload an image first");
+            return;
+        }
 
-            try {
-                const bgColor =
-                    BACKGROUND_COLORS[
-                        selectedBackground as keyof typeof BACKGROUND_COLORS
-                    ].color;
+        try {
+            const bgColor =
+                BACKGROUND_COLORS[
+                    selectedBackground as keyof typeof BACKGROUND_COLORS
+                ].color;
 
-                const result = await changeBackgroundMutation.mutateAsync({
-                    filename: uploadedFilename,
-                    background_color: bgColor,
-                });
+            const result = await changeBackgroundMutation.mutateAsync({
+                filename: uploadedFilename,
+                background_color: bgColor,
+            });
 
-                const processedDataUrl = await blobToDataUrl(result);
-                setProcessedImage(processedDataUrl);
-                toast.success("Background removed successfully!");
-            } catch (error) {
-                console.error("Background removal failed:", error);
-                toast.error("Failed to remove background. Please try again.");
-            }
-        },
-        [uploadedImage, uploadedFilename, changeBackgroundMutation]
-    );
+            const processedDataUrl = await blobToDataUrl(result);
+            setProcessedImage(processedDataUrl);
+            toast.success("Background removed successfully!");
+        } catch (error) {
+            console.error("Background removal failed:", error);
+            toast.error("Failed to remove background. Please try again.");
+        }
+    }, [uploadedImage, uploadedFilename, changeBackgroundMutation]);
 
     // Process image size with API integration
     const processImageSize = useCallback(
@@ -390,6 +388,12 @@ export function PhotoEditorEnhanced() {
         selectedFormat,
     ]);
 
+    // Handle image processed by filters
+    const handleImageProcessed = useCallback(async (blob: Blob) => {
+        const processedDataUrl = await blobToDataUrl(blob);
+        setProcessedImage(processedDataUrl);
+    }, []);
+
     // Reset all selections
     const resetSelections = useCallback(() => {
         setUploadedImage(null);
@@ -429,9 +433,19 @@ export function PhotoEditorEnhanced() {
             </header>
 
             <main className="container mx-auto px-4 py-8">
-                <div className="max-w-6xl mx-auto">
+                <div className="mx-auto">
                     <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-                        <div className="lg:col-span-2">
+                        {/* Left Column: Photo Filters & Effects */}
+                        <div className="space-y-6">
+                            <PhotoFilters
+                                uploadedFilename={uploadedFilename}
+                                isProcessing={isProcessing}
+                                onImageProcessed={handleImageProcessed}
+                            />
+                        </div>
+
+                        {/* Center Column: Image Upload/Display */}
+                        <div className="lg:col-span-1">
                             <Card>
                                 <CardHeader>
                                     <CardTitle className="flex items-center gap-2">
@@ -587,6 +601,7 @@ export function PhotoEditorEnhanced() {
                             </Card>
                         </div>
 
+                        {/* Right Column: Templates, Sizes, Background Options, Export */}
                         <div className="space-y-6">
                             <Card>
                                 <CardHeader>
@@ -709,9 +724,7 @@ export function PhotoEditorEnhanced() {
                                         disabled={
                                             !uploadedImage || isProcessing
                                         }
-                                        onClick={() =>
-                                            removeBackground()
-                                        }
+                                        onClick={() => removeBackground()}
                                     >
                                         <Scissors className="w-4 h-4 mr-2" />
                                         Remove Background

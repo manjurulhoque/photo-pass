@@ -357,9 +357,22 @@ export function PhotoEditorEnhanced() {
                     height: size.height,
                 });
 
-                const processedDataUrl = await blobToDataUrl(result);
-                setProcessedImage(processedDataUrl);
-                toast.success("Image size processed successfully!");
+                // then change background if selected
+                if (selectedBackground) {
+                    const backgroundResult =
+                        await changeBackgroundMutation.mutateAsync({
+                            filename: uploadedFilename,
+                            background_color: selectedBackground,
+                        });
+                    // Convert blob to data URL for display
+                    const processedDataUrl = await blobToDataUrl(backgroundResult);
+                    setProcessedImage(processedDataUrl);
+                    toast.success("Image size processed successfully!");
+                } else {
+                    const processedDataUrl = await blobToDataUrl(result);
+                    setProcessedImage(processedDataUrl);
+                    toast.success("Image size processed successfully!");
+                }
             } catch (error) {
                 console.error("Size processing failed:", error);
                 toast.error("Failed to process image size. Please try again.");

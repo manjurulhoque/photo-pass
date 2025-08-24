@@ -1,11 +1,12 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
+import { Input } from "@/components/ui/input";
 import {
     Tooltip,
     TooltipContent,
@@ -28,6 +29,7 @@ import {
     useApplySharpen,
     useConvertGrayscale,
     useApplySepia,
+    useResizeImage,
 } from "@/hooks/use-photo-api";
 import { toast } from "sonner";
 
@@ -35,18 +37,32 @@ interface PhotoFiltersProps {
     uploadedFilename: string | null;
     isProcessing: boolean;
     onImageProcessed: (blob: Blob) => void;
+    imageDimensions: { width: number; height: number } | null;
 }
 
 export function PhotoFilters({
     uploadedFilename,
     isProcessing,
     onImageProcessed,
+    imageDimensions,
 }: PhotoFiltersProps) {
     // State for slider values
     const [brightness, setBrightness] = useState(1.0);
     const [contrast, setContrast] = useState(1.0);
     const [saturation, setSaturation] = useState(1.0);
     const [blurRadius, setBlurRadius] = useState(5);
+
+    // State for width and height inputs
+    const [customWidth, setCustomWidth] = useState<number>(0);
+    const [customHeight, setCustomHeight] = useState<number>(0);
+
+    // Update width and height inputs when image dimensions change
+    useEffect(() => {
+        if (imageDimensions) {
+            setCustomWidth(imageDimensions.width);
+            setCustomHeight(imageDimensions.height);
+        }
+    }, [imageDimensions]);
 
     // State for toggle effects
     const [isGrayscale, setIsGrayscale] = useState(false);
@@ -62,6 +78,7 @@ export function PhotoFilters({
     const sharpenMutation = useApplySharpen();
     const grayscaleMutation = useConvertGrayscale();
     const sepiaMutation = useApplySepia();
+    const resizeMutation = useResizeImage();
 
     // Check if any processing is happening
     const isAnyProcessing =
@@ -72,7 +89,8 @@ export function PhotoFilters({
         blurMutation.isPending ||
         sharpenMutation.isPending ||
         grayscaleMutation.isPending ||
-        sepiaMutation.isPending;
+        sepiaMutation.isPending ||
+        resizeMutation.isPending;
 
     // Handle brightness adjustment
     const handleBrightnessChange = async (value: number[]) => {
@@ -251,6 +269,29 @@ export function PhotoFilters({
         }
     };
 
+    // Handle custom resize
+    const handleCustomResize = async () => {
+        if (!uploadedFilename || !customWidth || !customHeight) {
+            toast.error("Please enter valid width and height values");
+            return;
+        }
+
+        try {
+            const result = await resizeMutation.mutateAsync({
+                filename: uploadedFilename,
+                width: customWidth,
+                height: customHeight,
+            });
+            onImageProcessed(result);
+            toast.success(
+                `Image resized to ${customWidth} × ${customHeight} px successfully!`
+            );
+        } catch (error) {
+            console.error("Custom resize failed:", error);
+            toast.error("Failed to resize image. Please try again.");
+        }
+    };
+
     // Reset all filters
     const resetFilters = () => {
         setBrightness(1.0);
@@ -383,6 +424,67 @@ export function PhotoFilters({
                         <span>Normal</span>
                         <span>Vivid</span>
                     </div>
+                </div>
+
+                {/* Image Dimensions */}
+                <div className="space-y-3">
+                    <div className="flex items-center gap-2">
+                        <ImageIcon className="w-4 h-4 text-blue-500" />
+                        <Label className="text-sm font-medium">
+                            Image Dimensions
+                        </Label>
+                    </div>
+                    <div className="grid grid-cols-2 gap-3">
+                        <div className="space-y-2">
+                            <Label className="text-xs text-muted-foreground">
+                                Width (px)
+                            </Label>
+                            <Input
+                                type="number"
+                                value={customWidth || ""}
+                                onChange={(e) =>
+                                    setCustomWidth(Number(e.target.value) || 0)
+                                }
+                                placeholder="Width"
+                                className="text-sm"
+                                disabled={!uploadedFilename || isAnyProcessing}
+                            />
+                        </div>
+                        <div className="space-y-2">
+                            <Label className="text-xs text-muted-foreground">
+                                Height (px)
+                            </Label>
+                            <Input
+                                type="number"
+                                value={customHeight || ""}
+                                onChange={(e) =>
+                                    setCustomHeight(Number(e.target.value) || 0)
+                                }
+                                placeholder="Height"
+                                className="text-sm"
+                                disabled={!uploadedFilename || isAnyProcessing}
+                            />
+                        </div>
+                    </div>
+                    {imageDimensions && (
+                        <div className="text-xs text-muted-foreground text-center p-2 bg-blue-50 rounded-lg">
+                            Original: {imageDimensions.width} ×{" "}
+                            {imageDimensions.height} px
+                        </div>
+                    )}
+                    <Button
+                        onClick={handleCustomResize}
+                        disabled={
+                            !uploadedFilename ||
+                            !customWidth ||
+                            !customHeight ||
+                            isAnyProcessing
+                        }
+                        className="w-full"
+                        size="sm"
+                    >
+                        Resize Image
+                    </Button>
                 </div>
 
                 {/* Blur Effect */}
@@ -561,6 +663,22 @@ export function PhotoFilters({
                             <span>Blur Radius:</span>
                             <span className="font-mono">{blurRadius}</span>
                         </div>
+                        {imageDimensions && (
+                            <>
+                                <div className="flex justify-between">
+                                    <span>Current Width:</span>
+                                    <span className="font-mono">
+                                        {imageDimensions.width}px
+                                    </span>
+                                </div>
+                                <div className="flex justify-between">
+                                    <span>Current Height:</span>
+                                    <span className="font-mono">
+                                        {imageDimensions.height}px
+                                    </span>
+                                </div>
+                            </>
+                        )}
                     </div>
                 </div>
 

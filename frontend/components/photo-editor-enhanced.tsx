@@ -129,6 +129,10 @@ export function PhotoEditorEnhanced() {
     const [uploadedFilename, setUploadedFilename] = useState<string | null>(
         null
     );
+    const [imageDimensions, setImageDimensions] = useState<{
+        width: number;
+        height: number;
+    } | null>(null);
 
     const fileInputRef = useRef<HTMLInputElement>(null);
     const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -137,6 +141,19 @@ export function PhotoEditorEnhanced() {
     const uploadMutation = useUploadImage();
     const changeBackgroundMutation = useChangeBackground();
     const resizeMutation = useResizeImage();
+
+    // Extract image dimensions from file
+    const extractImageDimensions = (
+        file: File
+    ): Promise<{ width: number; height: number }> => {
+        return new Promise((resolve) => {
+            const img = new Image();
+            img.onload = () => {
+                resolve({ width: img.naturalWidth, height: img.naturalHeight });
+            };
+            img.src = URL.createObjectURL(file);
+        });
+    };
 
     // Handle file upload with API integration
     const handleFileUpload = useCallback(
@@ -149,6 +166,10 @@ export function PhotoEditorEnhanced() {
             }
 
             try {
+                // Extract image dimensions
+                const dimensions = await extractImageDimensions(file);
+                setImageDimensions(dimensions);
+
                 // Show preview immediately
                 const reader = new FileReader();
                 reader.onload = (e) => {
@@ -172,6 +193,7 @@ export function PhotoEditorEnhanced() {
                 // Reset preview on upload failure
                 setUploadedImage(null);
                 setProcessedImage(null);
+                setImageDimensions(null);
             }
         },
         [uploadMutation]
@@ -403,6 +425,7 @@ export function PhotoEditorEnhanced() {
         setSelectedTemplate(null);
         setBackgroundRemoved(false);
         setUploadedFilename(null);
+        setImageDimensions(null);
     }, []);
 
     const isProcessing =
@@ -441,6 +464,7 @@ export function PhotoEditorEnhanced() {
                                 uploadedFilename={uploadedFilename}
                                 isProcessing={isProcessing}
                                 onImageProcessed={handleImageProcessed}
+                                imageDimensions={imageDimensions}
                             />
                         </div>
 

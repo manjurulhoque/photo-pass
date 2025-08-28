@@ -2,7 +2,6 @@ from rembg import remove
 import os
 import time
 from PIL import Image, ImageEnhance, ImageFilter
-import cv2
 import numpy as np
 from app.core.config import settings
 

@@ -1,11 +1,7 @@
 from fastapi import APIRouter, UploadFile, File, HTTPException, Form
 from fastapi.responses import FileResponse
-from typing import Optional
 import os
 import uuid
-from PIL import Image, ImageEnhance, ImageFilter
-import cv2
-import numpy as np
 from app.core.config import settings
 from app.services.image_processor import ImageProcessor
 from app.schemas.photo_editing import (

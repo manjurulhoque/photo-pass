@@ -1,0 +1,34 @@
+version: '3.8'
+
+services:
+  backend:
+    container_name: photo-pass-backend
+    image: photo-pass-backend:latest
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./backend:/app
+    networks:
+      - app-network
+
+  frontend:
+    container_name: photo-pass-frontend
+    image: photo-pass-frontend:latest
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./frontend:/app
+    networks:
+      - app-network
+    depends_on:
+      - backend
+
+networks:
+  app-network:
+    driver: bridge

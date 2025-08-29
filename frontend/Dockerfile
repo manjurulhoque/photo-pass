@@ -1,19 +1,19 @@
-# 1. Build stage
+# Stage 1: Builder
 FROM node:20-slim AS builder
 WORKDIR /app
 
 COPY package.json package-lock.json ./
-RUN npm install --force
+# Install ignoring peer conflicts
+RUN npm install --legacy-peer-deps
 
 COPY . .
 RUN npm run build
 
-# 2. Production stage
+# Stage 2: Runner
 FROM node:20-slim AS runner
 WORKDIR /app
 ENV NODE_ENV=production
 
-# Copy only what is needed
 COPY --from=builder /app/package.json ./package.json
 COPY --from=builder /app/node_modules ./node_modules
 COPY --from=builder /app/.next ./.next

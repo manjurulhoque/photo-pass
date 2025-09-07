@@ -1,0 +1,7 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: photo-pass
+  labels:
+    name: photo-pass
+    app: photo-pass

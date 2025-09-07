@@ -1,0 +1,13 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: photo-pass-config
+  namespace: photo-pass
+data:
+  # Backend configuration
+  ALLOWED_ORIGINS: "http://localhost:3000,http://photo-pass-frontend:3000"
+  LOG_LEVEL: "INFO"
+  
+  # Frontend configuration
+  NEXT_PUBLIC_API_URL: "http://photo-pass-backend:8000"
+  NEXT_PUBLIC_APP_NAME: "Photo Pass"
